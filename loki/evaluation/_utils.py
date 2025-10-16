@@ -97,26 +97,6 @@ def _compute_metrics(y_true, y_pred, y_proba=None):
     out["F1"]        = f1_score(y_true, y_pred, average=average)
     out["Precision"] = precision_score(y_true, y_pred, average=average, zero_division=0)
     out["Recall"]    = recall_score(y_true, y_pred, average=average)
-
-    # # Probabilistic metrics
-    # roc, brier = np.nan, np.nan
-    # if y_proba is not None:
-    #     try:
-    #         if y_proba.ndim == 1 or y_proba.shape[1] == 1:
-    #             # binary, prob of positive class
-    #             roc = roc_auc_score(y_true, y_proba.ravel())
-    #             brier = brier_score_loss(y_true, y_proba.ravel())
-    #         else:
-    #             # multiclass
-    #             roc = roc_auc_score(y_true, y_proba, multi_class="ovr")
-    #             # Brier: mean of per-class probabilities assigned to true class
-    #             true_idx = pd.Series(y_true).map({c:i for i,c in enumerate(np.unique(y_true))}).values
-    #             p_true = y_proba[np.arange(len(y_true)), true_idx]
-    #             brier = brier_score_loss(y_true, p_true)  # works with integer labels
-    #     except Exception:
-    #         pass
-    # out["ROC_AUC"] = roc
-    # out["Brier"]   = brier
     return out
 
 
