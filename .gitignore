@@ -20,3 +20,5 @@ loki/efficacy/__pycache__/utils.cpython-310.pyc
 loki/efficacy/__pycache__/visualization.cpython-310.pyc
 loki/visualization/__pycache__/__init__.cpython-310.pyc
 loki/visualization/__pycache__/visualization.cpython-310.pyc
+.gitignore
+loki/__pycache__/_utils.cpython-310.pyc
