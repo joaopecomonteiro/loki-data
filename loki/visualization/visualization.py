@@ -3,7 +3,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def kernel_density_estimate(real_data, synthetic_data, cols=None, n_cols=3, figsize=(16, 10)):
+
+from loki._utils import lokiError
+
+
+def kernel_density_estimate(datasets, cols=None, n_cols=3, figsize=(16, 10)):
     """
     Plot kernel density estimation plots comparing numeric feature distributions 
     between real and synthetic datasets.
@@ -21,13 +25,16 @@ def kernel_density_estimate(real_data, synthetic_data, cols=None, n_cols=3, figs
     figsize : tuple, default=(16,10)
         Overall figure size.
     """
+    if type(datasets) != dict:
+        raise lokiError("datasets must be a dictionary", '0002')
+    
+    datasets_list = [dataset.assign(Source=dataset_name) 
+                     for dataset_name, dataset in datasets.items()] 
 
+    combined = pd.concat(datasets_list)
 
-    combined = pd.concat([real_data.assign(Source="Real"),
-                          synthetic_data.assign(Source="Synthetic")],
-                          ignore_index=True)  
-
-    cols = real_data.select_dtypes(include=['float64', 'int64']).columns
+    if cols is None:
+        cols = datasets_list[0].select_dtypes(include=['float64', 'int64']).columns
 
     n_rows = int(np.ceil(len(cols) / n_cols))
     fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
@@ -56,7 +63,7 @@ def kernel_density_estimate(real_data, synthetic_data, cols=None, n_cols=3, figs
     return
 
 
-def categorical_proportions(real_data, synthetic_data, cols=None, n_cols=3, figsize=(16, 10)):
+def categorical_proportions(datasets, cols=None, n_cols=3, figsize=(16, 10)):
     """
     Plot side-by-side count plots comparing category distributions
     between real and synthetic datasets.
@@ -75,14 +82,20 @@ def categorical_proportions(real_data, synthetic_data, cols=None, n_cols=3, figs
         Overall figure size.
     """
 
-    combined = pd.concat([real_data.assign(Source="Real"),
-                          synthetic_data.assign(Source="Synthetic")],
-                          ignore_index=True)  
-    
-    
 
-    cols = real_data.select_dtypes(include=['object', 'category']).columns
+    if type(datasets) != dict:
+        raise lokiError("datasets must be a dictionary", '0002')
     
+    datasets_list = [dataset.assign(Source=dataset_name) 
+                     for dataset_name, dataset in datasets.items()] 
+
+    combined = pd.concat(datasets_list)
+
+    if cols is None:
+        cols = datasets_list[0].select_dtypes(include=['object', 'category']).columns
+    
+    cols = cols.delete(-1)
+
     n_rows = int(np.ceil(len(cols) / n_cols))
     fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
     axes = axes.flatten()
@@ -100,6 +113,7 @@ def categorical_proportions(real_data, synthetic_data, cols=None, n_cols=3, figs
         axes[i].set_xlabel("")
         axes[i].set_ylabel("")
         axes[i].tick_params(axis='x', rotation=45)
+
 
         
     for j in range(i+1, len(axes)):
@@ -148,9 +162,7 @@ def correlation_heatmaps(real_data, synthetic_data):
     plt.tight_layout()
     plt.show()
 
-
-
-def violin(real_data, synthetic_data, cols=None, n_cols=3, figsize=(16, 10)):
+def violin(datasets, cols=None, n_cols=3, figsize=(16, 10)):
     """
     Plot violin plots comparing numeric feature distributions 
     between real and synthetic datasets.
@@ -168,28 +180,36 @@ def violin(real_data, synthetic_data, cols=None, n_cols=3, figsize=(16, 10)):
     figsize : tuple, default=(16,10)
         Overall figure size.
     """
+        
+    if type(datasets) != dict:
+        raise lokiError("datasets must be a dictionary", '0002')
+    
+    datasets_list = [dataset.assign(Source=dataset_name) 
+                     for dataset_name, dataset in datasets.items()] 
+
+    combined = pd.concat(datasets_list)
+
 
     if cols is None:
-        cols = real_data.select_dtypes(include=np.number).columns.tolist()
+        cols = datasets_list[0].select_dtypes(include=['float64', 'int64']).columns
 
-    combined = pd.concat([real_data.assign(Source="Real"),
-                          synthetic_data.assign(Source="Synthetic")],
-                          ignore_index=True)  
-    
     n_rows = int(np.ceil(len(cols) / n_cols))
     fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
     axes = axes.flatten()
 
+    
+
     for i, col in enumerate(cols):
         sns.violinplot(data=combined,
-                       x="Source",
-                       y=col,
-                       ax=axes[i],
-                       cut=0,
-                       inner="quartile",
-                       alpha=0.5,
-                       hue='Source'
-        )
+                        x="income",
+                        y=col,
+                        ax=axes[i],
+                        inner="quart",
+                        hue='Source',
+                        dodge=False,
+                        fill=True,
+                        alpha=0.5
+            )
 
         axes[i].set_title(col, fontsize=11)
         axes[i].set_xlabel("")
@@ -198,10 +218,10 @@ def violin(real_data, synthetic_data, cols=None, n_cols=3, figsize=(16, 10)):
     for j in range(i+1, len(axes)):
         fig.delaxes(axes[j])
 
+
     plt.suptitle("Violin Plots: Real vs Synthetic Distributions", fontsize=14)
     plt.tight_layout(rect=[0, 0, 1, 0.97])
     plt.show()
-
 
 
 

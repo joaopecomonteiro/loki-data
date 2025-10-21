@@ -56,9 +56,9 @@ def _default_models(class_weight='balanced', random_state='123'):
 def _prepare_data(datasets, target, real_data_tag = "Real",
                  n_splits=5, n_repeats=10, random_state=123):
     
-    if type(datasets) != dict:
-        print("data must be a dictionary")
-        return
+    # if type(datasets) != dict:
+    #     print("data must be a dictionary")
+    #     return
 
 
     real_data = datasets[real_data_tag]
